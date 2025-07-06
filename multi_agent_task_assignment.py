@@ -16,34 +16,38 @@ class Tasks:
 n_agents=3
 n_tasks=5
 
-A1=Agent["A1",(0,0,0)]
-A2=Agent["A2",(4,0,0)]
-A3=Agent["A3",(10,0,0)]
-agents=[A1,A2,A3]
+A1=Agent("A1",(0,0,0))
+A2=Agent("A2",(4,0,0))
+A3=Agent("A3",(10,0,0))
+agents=(A1,A2,A3)
         
-T1=Tasks["T1",(40,50,0)]
-T2=Tasks["T2",(100,60,0)]
-T3=Tasks["T3",(86,90,0)]
-T4=Tasks["T4",(48,75,0)]
-T5=Tasks["T5",(82,91,0)]
-GCS=Tasks["GCS",(0,0,0)]
+T1=Tasks("T1",(40,50,0))
+T2=Tasks("T2",(100,60,0))
+T3=Tasks("T3",(86,90,0))
+T4=Tasks("T4",(48,75,0))
+T5=Tasks("T5",(82,91,0))
+GCS=Tasks("GCS",(0,0,0))
 
 tasks=[1,T2,T3,T4,T5,GCS]
 
 def capability_evaluation(agents, tasks):
-    capability=np.zeros(n_agents,n_tasks)
+    capability=np.zeros((n_agents,n_tasks))
+    column_sum_vector=np.zeros((1,n_tasks))
     for j in range(n_tasks):
         for i in range(n_agents):
             capability[i][j]=np.linalg.norm(agents[i].position-tasks[j].position)
+            column_sum_vector+=capability[i][j]
+        for k in range(n_agents):
+            capability[i][j]/=column_sum_vector[j]
 
     return capability
 
 def task_allocation(agents, tasks):
     capability=capability_evaluation(agents, tasks)
     for j in range(n_tasks):
-        max=np.max(capability[:,j])
+        max_capability=np.max(capability[:,j])
         for i in range(n_agents):
-         capability[i][j]-=max
+         capability[i][j]-=max_capability
 
          if capability[i][j]>=0 :
              tasks[j].agent_name=agents[i].name
@@ -53,22 +57,25 @@ def task_allocation(agents, tasks):
     return tasks, capability
 
 # Input communication relay time tables and assign them to the communication network
-communication_network=np.zeros(n_agents,n_agents)
+communication_network=np.zeros((n_agents,n_agents))
+average_message_size=10 #10 bits
+average_message_bandwidth=125 #125 bits
+average_transmission_time=average_message_size/average_message_bandwidth
 
 def permissible_communication_network(agents):
-    permissible_communication_network=np.zeros(n_agents,n_agents)
-    acceptable_factor=1.5
+    permissible_communication_network=np.zeros((n_agents,n_agents))
+    acceptable_factor=1.5/200000
     for i in range(n_agents):
         for j in range(n_agents):
-            permissible_communication_network[i][j]= acceptable_factor*(np.linalg.norm(agents[i].position-agents[j].position))
+            permissible_communication_network[i][j]= acceptable_factor*(np.linalg.norm(agents[i].position-agents[j].position))+average_transmission_time
     return permissible_communication_network
 
 
 def event_triggered_reassignment(communication_network,agents,tasks):
     permissible_communication_network=permissible_communication_network(agents)
     communication_error_matrix=communication_network-permissible_communication_network
-    link_matrix=np.zeros(n_agents,n_agents)
-    link_score_vector=np.zeros(1,n_agents)
+    link_matrix=np.zeros((n_agents,n_agents))
+    link_score_vector=np.zeros((1,n_agents))
     for j in range(n_agents):
         for i in range(n_agents):
             if communication_error_matrix[i][j]<=0 :
@@ -94,6 +101,42 @@ def event_triggered_reassignment(communication_network,agents,tasks):
 
     
         
+
+
+
+             
+             
+
+
+
+    
+
+
+
+
+
+
+        
+       
+    
+               
+
+
+
+    
+        
+
+
+
+             
+             
+
+
+
+    
+
+
+
 
 
 
